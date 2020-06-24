@@ -17,6 +17,14 @@
         android:layout_margin="5dp"
         android:textColor="#000"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/errorTextView"
+        android:visibility="invisible"
+        android:layout_below="@+id/search_bar"
+        android:textSize="8sp"
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

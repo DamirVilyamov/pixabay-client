@@ -3,12 +3,15 @@ package com.example.pixabayclient
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.View.VISIBLE
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.SearchView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.example.pixabayclient.retrofit.Hit
 import com.example.pixabayclient.retrofit.PixabayApiService
 import com.example.pixabayclient.retrofit.Post
 import kotlinx.android.synthetic.main.activity_main.*
@@ -21,62 +24,77 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
     val TAG = "MainActivity"
-    private val NUM_COLUMNS: Int = 2;
+    private val NUM_COLUMNS: Int = 2
     lateinit var searchBar: androidx.appcompat.widget.SearchView
 
-    private val KEY = "17058701-b7d71434149dd47c53775f272"
-    private val BASE_URL = "https://pixabay.com/api/"
-    private val imageType = "photo"
-    lateinit var searchQuery: String
+    private val KEY: String = "17058701-b7d71434149dd47c53775f272"
+    private val BASE_URL:String = "https://pixabay.com/"
+    private val imageType: String = "photo"
+    private lateinit var searchQuery: String
     var names: ArrayList<String> = ArrayList()
     var imageUrls: ArrayList<String> = ArrayList()
-
+    lateinit var errorText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         searchBar = search_bar
-        searchBar.setOnSearchClickListener(object: View.OnClickListener{
-            override fun onClick(v: View?) {
-                searchQuery = searchBar.query.toString()
-                var retrofit: Retrofit = Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-                var apiService: PixabayApiService = retrofit.create(PixabayApiService::class.java)
-                var call: Call<List<Post?>?>? = apiService.getPosts(KEY,searchQuery,imageType)
-
-
-                call!!.enqueue(object : Callback<List<Post?>?> {
-                    override fun onFailure(call: Call<List<Post?>?>, t: Throwable) {
-                        authorName.text = t.message
-                    }
-
-
-                    override fun onResponse(
-                        call: Call<List<Post?>?>,
-                        response: Response<List<Post?>?>
-                    ) {
-                        if (!response.isSuccessful) {
-                            authorName.text = "code" + response.code()
-                            return
-                        }
-                        val posts: List<Post>? = response.body() as List<Post>?
-                        if (posts != null) {
-                            for (post:Post in posts){
-                                names.add(post.user)
-                                imageUrls.add(post.imageURL)
-                            }
-                        }
-                    }
-
-                })
-                initRecyclerView()
+        errorText = errorTextView
+            /*searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                searchQuery = query.toString()
+                return true
             }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                TODO("Not yet implemented")
+            }
+
+        })*/
+
+        searchQuery = "flowers"
+        var retrofit: Retrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(BASE_URL)
+            .build()
+        var apiService: PixabayApiService = retrofit.create(PixabayApiService::class.java)
+        var call: Call<Post?> = apiService.getPosts(KEY,searchQuery,imageType)
+
+
+        call.enqueue(object : Callback<Post?> {
+            override fun onFailure(call: Call<Post?>, t: Throwable) {
+                errorText.visibility = VISIBLE
+                errorText.text = t.message
+            }
+
+
+            override fun onResponse(
+                call: Call<Post?>,
+                response: Response<Post?>
+            ) {
+                if (!response.isSuccessful) {
+                    authorName.text = "code" + response.code()
+                    return
+                }
+                val post: Post? = response.body()
+                var hitList: List<Hit>? = post?.hits
+                if (hitList != null) {
+                    for (hit in hitList){
+                        names.add(hit.user.toString())
+                        imageUrls.add(hit.imageURL.toString())
+                    }
+                }
+            }
+
         })
+        initRecyclerView()
 
     }
+/*
 
+
+*/
     private fun initImageBitmaps() {
         Log.d(TAG, "initImageBitmaps: preparing bitmaps.")
         initRecyclerView()
