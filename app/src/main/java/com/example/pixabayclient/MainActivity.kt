@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.View.VISIBLE
-import android.widget.EditText
+
 import android.widget.LinearLayout
 import android.widget.SearchView
 import android.widget.TextView
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var searchBar: androidx.appcompat.widget.SearchView
 
     private val KEY: String = "17058701-b7d71434149dd47c53775f272"
-    private val BASE_URL:String = "https://pixabay.com/"
+    private val BASE_URL: String = "https://pixabay.com/"
     private val imageType: String = "photo"
     private lateinit var searchQuery: String
     var names: ArrayList<String> = ArrayList()
@@ -40,26 +40,26 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         searchBar = search_bar
         errorText = errorTextView
-            /*searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
-            androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                searchQuery = query.toString()
-                return true
-            }
+        /*searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+        androidx.appcompat.widget.SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(query: String?): Boolean {
+            searchQuery = query.toString()
+            return true
+        }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                TODO("Not yet implemented")
-            }
+        override fun onQueryTextChange(newText: String?): Boolean {
+            TODO("Not yet implemented")
+        }
 
-        })*/
+    })*/
 
-        searchQuery = "flowers"
+        searchQuery = "kittens"
         var retrofit: Retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .baseUrl(BASE_URL)
             .build()
         var apiService: PixabayApiService = retrofit.create(PixabayApiService::class.java)
-        var call: Call<Post?> = apiService.getPosts(KEY,searchQuery,imageType)
+        var call: Call<Post?> = apiService.getPosts(KEY, searchQuery, imageType)
 
 
         call.enqueue(object : Callback<Post?> {
@@ -74,13 +74,14 @@ class MainActivity : AppCompatActivity() {
                 response: Response<Post?>
             ) {
                 if (!response.isSuccessful) {
-                    authorName.text = "code" + response.code()
+                    errorText.visibility = VISIBLE
+                    errorText.text = "code" + response.code()
                     return
                 }
                 val post: Post? = response.body()
                 var hitList: List<Hit>? = post?.hits
                 if (hitList != null) {
-                    for (hit in hitList){
+                    for (hit in hitList) {
                         names.add(hit.user.toString())
                         imageUrls.add(hit.imageURL.toString())
                     }
@@ -91,10 +92,6 @@ class MainActivity : AppCompatActivity() {
         initRecyclerView()
 
     }
-/*
-
-
-*/
     private fun initImageBitmaps() {
         Log.d(TAG, "initImageBitmaps: preparing bitmaps.")
         initRecyclerView()
@@ -105,7 +102,8 @@ class MainActivity : AppCompatActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.search_recycler_view)
         val staggeredRecyclerViewAdapter: StaggeredRecyclerViewAdapter =
             StaggeredRecyclerViewAdapter(this, names, imageUrls)
-        val staggeredGridLayoutManager:StaggeredGridLayoutManager = StaggeredGridLayoutManager(NUM_COLUMNS, LinearLayout.VERTICAL)
+        val staggeredGridLayoutManager: StaggeredGridLayoutManager =
+            StaggeredGridLayoutManager(NUM_COLUMNS, LinearLayout.VERTICAL)
         recyclerView.layoutManager = staggeredGridLayoutManager
         recyclerView.adapter = staggeredRecyclerViewAdapter
     }

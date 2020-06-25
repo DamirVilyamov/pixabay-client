@@ -21,7 +21,7 @@ class StaggeredRecyclerViewAdapter(
 ) : RecyclerView.Adapter<StaggeredRecyclerViewAdapter.ViewHolder>() {
     private val TAG = "StaggeredRecyclerViewAd"
 
-    class ViewHolder(var itemView: View, val image: ImageView, val name: TextView) :
+    class ViewHolder(itemView: View, val image: ImageView, val name: TextView) :
         RecyclerView.ViewHolder(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -33,20 +33,21 @@ class StaggeredRecyclerViewAdapter(
             view.findViewById(R.id.authorName)
         )
     }
+
     override fun getItemCount(): Int {
         return mImageUrls.size
     }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         Log.d(TAG, "onBindViewHolder: called.")
         val requestOptions: RequestOptions = RequestOptions()
             .placeholder(R.drawable.ic_launcher_background)
+        
         Glide.with(context).load(mImageUrls[position]).apply(requestOptions).into(holder.image)
         holder.name.text = names[position]
-        holder.image.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                Log.d(TAG, "onClick: clicked on" + names[position])
-                Toast.makeText(context, names[position], Toast.LENGTH_SHORT).show()
-            }
-        })
+        holder.image.setOnClickListener {
+            Log.d(TAG, "onClick: clicked on" + names[position])
+            Toast.makeText(context, names[position], Toast.LENGTH_SHORT).show()
+        }
     }
 }
