@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         searchBar = search_bar
         errorText = errorTextView
+
         /*searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
         androidx.appcompat.widget.SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean {
@@ -83,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                 if (hitList != null) {
                     for (hit in hitList) {
                         names.add(hit.user.toString())
-                        imageUrls.add(hit.imageURL.toString())
+                        imageUrls.add(hit.previewURL.toString())
                     }
                 }
             }
