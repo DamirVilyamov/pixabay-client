@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val KEY: String = "17058701-b7d71434149dd47c53775f272"
     private val BASE_URL: String = "https://pixabay.com/"
     private val imageType: String = "photo"
-    private lateinit var searchQuery: String
+    private var searchQuery: String = ""
     var names: ArrayList<String> = ArrayList()
     var imageUrls: ArrayList<String> = ArrayList()
     lateinit var errorText: TextView
@@ -41,28 +41,51 @@ class MainActivity : AppCompatActivity() {
         searchBar = search_bar
         errorText = errorTextView
 
-        /*searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
-        androidx.appcompat.widget.SearchView.OnQueryTextListener {
-        override fun onQueryTextSubmit(query: String?): Boolean {
-            searchQuery = query.toString()
-            return true
-        }
 
-        override fun onQueryTextChange(newText: String?): Boolean {
-            TODO("Not yet implemented")
-        }
-
-    })*/
-
-        searchQuery = "kittens"
+            // searchQuery = "kittens"
         var retrofit: Retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .baseUrl(BASE_URL)
             .build()
         var apiService: PixabayApiService = retrofit.create(PixabayApiService::class.java)
+
+
+        initRecyclerView()
+
+        searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                searchQuery = query.toString()
+                makeSearch(apiService)
+                initRecyclerView()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return true
+            }
+        })
+
+    }
+    private fun initImageBitmaps() {
+        Log.d(TAG, "initImageBitmaps: preparing bitmaps.")
+        initRecyclerView()
+    }
+
+    private fun initRecyclerView() {
+        Log.d(TAG, "initRecyclerView: initializing staggered recyclerview")
+        val recyclerView: RecyclerView = findViewById(R.id.search_recycler_view)
+        val staggeredRecyclerViewAdapter: StaggeredRecyclerViewAdapter =
+            StaggeredRecyclerViewAdapter(this, names, imageUrls)
+        val staggeredGridLayoutManager: StaggeredGridLayoutManager =
+            StaggeredGridLayoutManager(NUM_COLUMNS, LinearLayout.VERTICAL)
+        recyclerView.layoutManager = staggeredGridLayoutManager
+        recyclerView.adapter = staggeredRecyclerViewAdapter
+    }
+
+
+    private fun makeSearch(apiService: PixabayApiService){
         var call: Call<Post?> = apiService.getPosts(KEY, searchQuery, imageType)
-
-
         call.enqueue(object : Callback<Post?> {
             override fun onFailure(call: Call<Post?>, t: Throwable) {
                 errorText.visibility = VISIBLE
@@ -90,23 +113,6 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
-        initRecyclerView()
-
-    }
-    private fun initImageBitmaps() {
-        Log.d(TAG, "initImageBitmaps: preparing bitmaps.")
-        initRecyclerView()
-    }
-
-    private fun initRecyclerView() {
-        Log.d(TAG, "initRecyclerView: initializing staggered recyclerview")
-        val recyclerView: RecyclerView = findViewById(R.id.search_recycler_view)
-        val staggeredRecyclerViewAdapter: StaggeredRecyclerViewAdapter =
-            StaggeredRecyclerViewAdapter(this, names, imageUrls)
-        val staggeredGridLayoutManager: StaggeredGridLayoutManager =
-            StaggeredGridLayoutManager(NUM_COLUMNS, LinearLayout.VERTICAL)
-        recyclerView.layoutManager = staggeredGridLayoutManager
-        recyclerView.adapter = staggeredRecyclerViewAdapter
     }
 
 }
